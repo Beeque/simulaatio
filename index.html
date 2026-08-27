@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Particle Lab 2.0</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#090d13;color:#eaf1fa;font:13px system-ui}canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:none}.ui{position:fixed;z-index:2;inset:10px 10px auto;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:8px;border:1px solid #ffffff1a;border-radius:13px;background:#090c12e8;box-shadow:0 8px 30px #0009;backdrop-filter:blur(10px)}.grp{display:flex;align-items:center;gap:5px;padding-right:7px;border-right:1px solid #ffffff17}.grp:last-child{border:0}.brand{font-weight:800;color:#fff;padding:0 4px}.brand i{color:#d7a657;font-style:normal}button,select{border:1px solid #ffffff20;border-radius:8px;padding:6px 9px;background:#202733;color:#dfe7f3;cursor:pointer}button:hover,select:hover{background:#2a3443}button.on{border-color:#fff9;background:#d29a4b;color:#17110a;font-weight:700}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;background:var(--c)}label{display:flex;align-items:center;gap:6px;color:#aeb9c8}input{width:90px;accent-color:#d29a4b}input[type=number]{width:52px}input[type=color]{width:34px;height:28px;padding:2px;border:0;background:transparent}.stat{margin-left:auto;color:#9ba8ba;white-space:nowrap;font-variant-numeric:tabular-nums}@media(max-width:900px){.stat{width:100%;margin:0}.ui{max-height:42vh;overflow:auto}}
+*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#090d13;color:#eaf1fa;font:13px system-ui}canvas{display:block;width:100%;height:100%;cursor:crosshair;touch-action:none}.ui{position:fixed;z-index:2;inset:10px 10px auto;display:flex;align-items:center;flex-wrap:wrap;gap:6px;padding:8px;border:1px solid #ffffff1a;border-radius:13px;background:#090c12e8;box-shadow:0 8px 30px #0009;backdrop-filter:blur(10px);pointer-events:none}.ui button,.ui select,.ui input,.ui label,.ui output,.ui .brand{pointer-events:auto}.grp{display:flex;align-items:center;gap:5px;padding-right:7px;border-right:1px solid #ffffff17}.grp:last-child{border:0}.brand{font-weight:800;color:#fff;padding:0 4px}.brand i{color:#d7a657;font-style:normal}button,select{border:1px solid #ffffff20;border-radius:8px;padding:6px 9px;background:#202733;color:#dfe7f3;cursor:pointer}button:hover,select:hover{background:#2a3443}button.on{border-color:#fff9;background:#d29a4b;color:#17110a;font-weight:700}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:5px;background:var(--c)}label{display:flex;align-items:center;gap:6px;color:#aeb9c8}input{width:90px;accent-color:#d29a4b}input[type=number]{width:52px}input[type=color]{width:34px;height:28px;padding:2px;border:0;background:transparent}.stat{margin-left:auto;color:#9ba8ba;white-space:nowrap;font-variant-numeric:tabular-nums;font-size:12px}.hint{color:#6d7a8c;font-size:11px;padding:0 4px}@media(max-width:900px){.stat,.hint{width:100%;margin:0}.ui{max-height:42vh;overflow:auto}}
 </style>
 </head>
 <body>
@@ -12,15 +12,16 @@
 <div class="ui">
  <div class="grp"><span class="brand">Particle Lab <i>2.0</i></span></div>
  <div class="grp" id="tools"></div>
- <div class="grp"><label>Koko <input id="size" type="range" min="1" max="16" value="5"><output id="sizeOut">5</output></label><label>Veden väri <input id="wc" type="color" value="#4399e7"></label></div>
+ <div class="grp"><label>Koko <input id="size" type="range" min="1" max="16" value="5"><output id="sizeOut">5</output></label><label>Nopeus <input id="spd" type="range" min="1" max="4" value="1"><output id="spdOut">1×</output></label><label>Veden väri <input id="wc" type="color" value="#4399e7"></label></div>
  <div class="grp"><button id="pause">⏸ Tauko</button><button id="step">Askel</button><button id="clear">Tyhjennä</button></div>
- <div class="grp"><select id="exp"><option value="">Kokeet…</option><option value="hourglass">Tiimalasi</option><option value="dam">Pato</option><option value="ice">Jääluola ja tuli</option><option value="oil">Öljy veden päällä</option><option value="forest">Metsäpalo</option><option value="acid">Happosäiliö</option></select><button id="load">Lataa koe</button></div>
+ <div class="grp"><select id="exp"><option value="">Kokeet…</option><option value="hourglass">Tiimalasi</option><option value="dam">Pato</option><option value="ice">Jääluola ja tuli</option><option value="oil">Öljy veden päällä</option><option value="forest">Metsäpalo</option><option value="volcano">Tulivuori</option><option value="acid">Happosäiliö</option></select><button id="load">Lataa koe</button></div>
  <span class="stat" id="stat">0 partikkelia · 0 FPS</span>
+ <span class="hint" id="hint">1–9 työkalut · Shift=viiva · [ ] koko · Space tauko</span>
 </div>
 <script>
 (()=>{
 'use strict';
-const c=document.querySelector('#c'),g=c.getContext('2d',{alpha:false}),ui=document.querySelector('#tools'),st=document.querySelector('#stat'),sl=document.querySelector('#size'),so=document.querySelector('#sizeOut'),wc=document.querySelector('#wc');
+const c=document.querySelector('#c'),g=c.getContext('2d',{alpha:false}),ui=document.querySelector('#tools'),st=document.querySelector('#stat'),sl=document.querySelector('#size'),so=document.querySelector('#sizeOut'),spdEl=document.querySelector('#spd'),spdOut=document.querySelector('#spdOut'),wc=document.querySelector('#wc'),pauseBtn=document.querySelector('#pause');
 const Z=4,E=0,S=1,W=2,B=3,O=4,F=5,D=6,V=7,L=8,P=9,A=10,J=11,K=12,H=13;
 const M={
  [S]:{n:'Hiekka',c:['#f0d28f','#d9ae60','#c88d3f'],k:'powder',d:8},
@@ -37,7 +38,7 @@ const M={
  [K]:{n:'Hiili',c:['#291e19','#463126'],k:'solid',d:99},
  [H]:{n:'Savu',c:['#30363e','#454d57','#626c77'],k:'smoke',d:0}
 };
-let w,h,a,age,tmp,vel,trait,rr,gg,bb,mark,t=S,br=5,run=1,once=0,tick=1,mouse={x:0,y:0,d:0},flip=0,last=performance.now(),frames=0,fps=0,lastPaint={x:-1,y:-1,dx:0,dy:1};
+let w,h,a,age,tmp,vel,trait,rr,gg,bb,mark,t=S,br=5,spd=1,run=1,once=0,tick=1,mouse={x:0,y:0,d:0,sh:0},flip=0,last=performance.now(),frames=0,fps=0,lastPaint={x:-1,y:-1,dx:0,dy:1},shiftFrom=null,saveT=0,toolBtns=new Map();
 const I=(x,y)=>x<0||y<0||x>=w||y>=h?-1:y*w+x;
 // Pakkaa piirrettävä vesiväri 24-bittiseksi avaimeksi.
 // 4 arvon kvantisointi yhdistää lähes samat sävyt pidemmiksi jaksoiksi.
@@ -136,32 +137,35 @@ const liquid=(x,y,i,v)=>{
 
 
  if(v===W){
-  mix(x,y,i);
-
-  // Putoaminen ja viistovaluminen ovat aina ensisijaisia.
-  const b=I(x,y+1);
-  if(b>=0&&pass.includes(a[b])&&swap(i,b))return;
-  if(mv(x,y,i,[[d,1],[-d,1]],pass))return;
-
-  // Tasaus: valitse lähin vapaa paikka saman vesikerroksen reunalta.
-  // Ensin suositaan paikkaa, jonka alapuolella on tuki. Jos sellaista
-  // ei ole, vesi saa purkautua reunan yli ja jatkaa putoamista.
-  let dst=-1,dist=99,drop=-1,dd=99;
-  for(const e of [d,-d])for(let n=1;n<=20;n++){
-   const j=I(x+e*n,y);if(j<0||a[j]!==W&&a[j]!==E)break;
-   if(a[j]===E){
-    const u=I(x+e*n,y+1),supported=u<0||!pass.includes(a[u]);
-    if(supported&&n<dist){dst=j;dist=n}
-    else if(n<dd){drop=j;dd=n}
-    break
-   }
-  }
-  if(dst<0)dst=drop;
-  if(dst>=0){swap(i,dst);return}
-
-  // Pieni paikallinen liike tasoittaa viimeiset portaat ilman värinää.
-  if((tick+q)%3===0)mv(x,y,i,[[d,0],[-d,0]],pass);
-  return
+  mix(x,y,i);
+  const b=I(x,y+1);
+  if(b>=0&&pass.includes(a[b])&&swap(i,b))return;
+  if(mv(x,y,i,[[d,1],[-d,1]],pass))return;
+  let dst=-1,dist=99,drop=-1,dd=99;
+  for(const e of [d,-d])for(let n=1;n<=20;n++){
+   const j=I(x+e*n,y);if(j<0||a[j]!==W&&a[j]!==E)break;
+   if(a[j]===E){
+    const u=I(x+e*n,y+1),supported=u<0||!pass.includes(a[u]);
+    if(supported&&n<dist){dst=j;dist=n}
+    else if(n<dd){drop=j;dd=n}
+    break
+   }
+  }
+  if(dst<0)dst=drop;
+  if(dst>=0){swap(i,dst);return}
+  if((tick+q)%3===0)mv(x,y,i,[[d,0],[-d,0]],pass);
+  return
+ }
+ if(v===O){
+  // Öljy kelluu vedessä: nousee veden läpi ja leviää pinnalle.
+  const u=I(x,y-1);
+  if(u>=0&&a[u]===W&&swap(i,u))return;
+  if(mv(x,y,i,[[d,-1],[-d,-1],[0,-1]],[W]))return;
+  const b=I(x,y+1);
+  if(b>=0&&a[b]===W){
+   if(mv(x,y,i,[[d,0],[-d,0],[d,-1],[-d,-1]],[E,W,V]))return;
+   return
+  }
  }
  if(mv(x,y,i,[[0,1],[d,1],[-d,1]],pass))return;
  const r=Math.min(3,M[v].flow||2);
@@ -221,6 +225,7 @@ const react=(x,y,i,v)=>{
  }
  if(v===K){for(const j of around(x,y,D))if(Math.random()<.025)tmp[j]=Math.min(500,tmp[j]+1);if(tmp[i]>180&&Math.random()<.0008){const j=one(x,y,E);if(j>=0)set(j,F)}if(age[i]>3500&&Math.random()<.00003)set(i,E)}
  if(v===J&&tmp[i]>=100)set(i,W);
+ if(v===J&&tmp[i]>20&&tmp[i]<100&&Math.random()<tmp[i]/600)set(i,W);
 };
 const step=()=>{
  tick++;flip^=1;
@@ -238,42 +243,14 @@ const step=()=>{
   }
  }
 };
-const paint=()=>{
- const x=mouse.x/Z|0,y=mouse.y/Z|0;
- const pdx=x-lastPaint.x,pdy=y-lastPaint.y,pl=Math.hypot(pdx,pdy);
- if(pl>.4){lastPaint.dx=pdx/pl;lastPaint.dy=pdy/pl}
- lastPaint.x=x;lastPaint.y=y;
-
-
- if(t===W||t===O){
-  // Vesi ja öljy tulevat hanamaisena virtana. Öljy on vettä
-  // hitaampaa ja kapeampaa, jotta se ei roisku sivellinmassana.
-  const oil=t===O,r=br;
-  for(let X=-r;X<=r;X++){
-   const phase=(tick+X*7+r*11)%(oil?5:3);
-   if(phase>=(oil?2:2)&&r>0)continue;
-   const Y=(tick+X*13)&1,i=I(x+X,y+Y);
-   if(i>=0&&a[i]===E){
-    set(i,t);
-    trait[i]=1+((tick*29+X*47+r*17)%254+254)%254;
-    vel[i]=oil?0:1;
-   }
-  }
-  return;
- }
-
-
+const paintAt=(x,y)=>{
  for(let Y=-br;Y<=br;Y++)for(let X=-br;X<=br;X++){
-  if(X*X+Y*Y>br*br)continue;
-  const i=I(x+X,y+Y);
-  if(i<0)continue;
-  // Pyyhin poistaa kaiken siveltimen alta. Muut työkalut piirtävät
-  // tyhjään tilaan, ja seinä voi edelleen korvata muita materiaaleja.
-  if(t===E){
-   if(a[i]!==E)set(i,E);
- }else if(t===F){
-   // Tulisivellin: Gaussinen lämpö + johtuminen puussa + siveltimen
-   // suuntaan painottuva sytytysfrontti.
+  if(X*X+Y*Y>br*br)continue;
+  const i=I(x+X,y+Y);
+  if(i<0)continue;
+  if(t===E){
+   if(a[i]!==E)set(i,E);
+  }else if(t===F){
    const dist2=X*X+Y*Y,intensity=Math.exp(-dist2/(br*br*.28+.5));
    if(intensity<.06)continue;
    const cx=x+X,cy=y+Y,grain=1+Math.max(0,(lastPaint.dx*X+lastPaint.dy*Y)/(br+1))*.45;
@@ -287,8 +264,39 @@ const paint=()=>{
    else if(a[i]===O&&Math.random()<.18+intensity*.28)set(i,F,100);
    else if(a[i]===P&&Math.random()<.08+intensity*.22)set(i,F,100);
    else if(a[i]===E&&(dist2<=(br*.68)*(br*.68)||Math.random()<.22+intensity*.35))set(i,F,100);
-  }else if(a[i]===E||t===B)set(i,t,0);
+  }else if(a[i]===E||t===B)set(i,t,0);
  }
+};
+const paint=()=>{
+ const x=mouse.x/Z|0,y=mouse.y/Z|0;
+ const pdx=x-lastPaint.x,pdy=y-lastPaint.y,pl=Math.hypot(pdx,pdy);
+ if(pl>.4){lastPaint.dx=pdx/pl;lastPaint.dy=pdy/pl}
+ lastPaint.x=x;lastPaint.y=y;
+ if(t===W||t===O){
+  const oil=t===O,r=br;
+  for(let X=-r;X<=r;X++){
+   const phase=(tick+X*7+r*11)%(oil?5:3);
+   if(phase>=(oil?2:2)&&r>0)continue;
+   const Y=(tick+X*13)&1,i=I(x+X,y+Y);
+   if(i>=0&&a[i]===E){
+    set(i,t);
+    trait[i]=1+((tick*29+X*47+r*17)%254+254)%254;
+    vel[i]=oil?0:1;
+   }
+  }
+  return;
+ }
+ if(mouse.sh&&shiftFrom){
+  const n=Math.max(Math.abs(x-shiftFrom.x),Math.abs(y-shiftFrom.y),1);
+  for(let k=0;k<=n;k++){
+   const px=Math.round(shiftFrom.x+(x-shiftFrom.x)*k/n),py=Math.round(shiftFrom.y+(y-shiftFrom.y)*k/n);
+   if(t===F)paintAt(px,py);
+   else line(px,py,px,py,t,br);
+  }
+  shiftFrom={x,y};
+  return;
+ }
+ paintAt(x,y);
 };
 const draw=()=>{
  g.fillStyle='#090d13';g.fillRect(0,0,innerWidth,innerHeight);let total=0;
@@ -308,18 +316,29 @@ const draw=()=>{
 
 
   total++;
-  if(v===H){
-   const fade=Math.max(.06,.24-age[i]/1900),r=Z*(1.05+Math.min(age[i],260)/520);
-   g.fillStyle=`rgba(104,115,128,${fade})`;
-   g.beginPath();g.arc(x*Z+Z/2,y*Z+Z/2,r,0,Math.PI*2);g.fill();
-   continue
-  }
-
-
-  const q=M[v],cs=q.c;g.fillStyle=cs[trait[i]%cs.length];
-  g.fillRect(x*Z,y*Z,Z+.2,Z+.2);
+  if(v===H){
+   const fade=Math.max(.06,.24-age[i]/1900),r=Z*(1.05+Math.min(age[i],260)/520);
+   g.fillStyle=`rgba(104,115,128,${fade})`;
+   g.beginPath();g.arc(x*Z+Z/2,y*Z+Z/2,r,0,Math.PI*2);g.fill();
+   continue
+  }
+  if(v===F){
+   const cs=M[F].c,core=cs[trait[i]%cs.length];
+   g.fillStyle='rgba(255,90,20,.28)';
+   g.fillRect(x*Z-1.2,y*Z-1.2,Z+2.4,Z+2.4);
+   g.fillStyle=core;
+   g.fillRect(x*Z,y*Z,Z+.2,Z+.2);
+   if((trait[i]+tick)%3===0){g.fillStyle='#fff3a0';g.fillRect(x*Z+1,y*Z+1,2,2)}
+   continue
+  }
+  const q=M[v],cs=q.c;g.fillStyle=cs[trait[i]%cs.length];
+  g.fillRect(x*Z,y*Z,Z+.2,Z+.2);
+  if(v===J&&tmp[i]>15){
+   const melt=Math.min(1,tmp[i]/100);
+   g.fillStyle=`rgba(180,225,255,${.15+melt*.35})`;
+   g.fillRect(x*Z,y*Z,Z+.2,Z+.2);
+  }
   if((v===D||v===K)&&tmp[i]>95){
-   // Pysyvä partikkelikohtainen kohina poistaa vinoraidat ja vilkkumisen.
    const p=Math.min(.88,(tmp[i]-95)/175),n=((trait[i]*73+i*29)>>>0)%256/255;
    if(n<p){
     const hot=tmp[i]>220,w=hot?2:1;
@@ -330,14 +349,41 @@ const draw=()=>{
     g.fillStyle='rgba(255,120,40,.55)';
     g.fillRect(x*Z+(trait[i]&3),y*Z+((trait[i]>>2)&3),2,2);
    }
+   if(v===K&&tmp[i]>120&&Math.random()<.04){
+    g.fillStyle='rgba(255,80,30,.45)';
+    g.fillRect(x*Z+(trait[i]&2),y*Z+(trait[i]&2),2,2);
+   }
   }
-  if(v===F&&Math.random()<.18){g.fillStyle='#fff3a0';g.fillRect(x*Z+1,y*Z+1,2,2)}
  }
- frames++;const now=performance.now();if(now-last>500){fps=Math.round(frames*1000/(now-last));frames=0;last=now;st.textContent=`${total} partikkelia · ${fps} FPS · ${run?'käynnissä':'tauko'}`}
+ frames++;const now=performance.now();if(now-last>500){fps=Math.round(frames*1000/(now-last));frames=0;last=now;const tn=t===E?'Pyyhin':M[t]?.n||'?';st.textContent=`${tn} · ${total} partikkelia · ${fps} FPS · ${spd}× · ${run?'käynnissä':'tauko'}`}
 };
 const rect=(x1,y1,x2,y2,v)=>{for(let y=y1;y<=y2;y++)for(let x=x1;x<=x2;x++)set(I(x,y),v)};
 const line=(x1,y1,x2,y2,v,r=0)=>{const n=Math.max(Math.abs(x2-x1),Math.abs(y2-y1));for(let k=0;k<=n;k++){const x=Math.round(x1+(x2-x1)*k/n),y=Math.round(y1+(y2-y1)*k/n);for(let Y=-r;Y<=r;Y++)for(let X=-r;X<=r;X++)if(X*X+Y*Y<=r*r)set(I(x+X,y+Y),v)}};
-const clear=()=>{a.fill(E);age.fill(0);tmp.fill(0);vel.fill(0);trait.fill(0);mark.fill(0)};
+const clear=()=>{a.fill(E);age.fill(0);tmp.fill(0);vel.fill(0);trait.fill(0);mark.fill(0);cc.clear();try{localStorage.removeItem('pl2')}catch{}};
+const snap=()=>{
+ if(!a)return;
+ try{
+  localStorage.setItem('pl2',JSON.stringify({
+   w,h,a:Array.from(a),age:Array.from(age),tmp:Array.from(tmp),vel:Array.from(vel),
+   trait:Array.from(trait),rr:Array.from(rr),gg:Array.from(gg),bb:Array.from(bb),tick
+  }))
+ }catch{}
+};
+const restore=()=>{
+ try{
+  const raw=localStorage.getItem('pl2');if(!raw)return;
+  const d=JSON.parse(raw);
+  if(d.w!==w||d.h!==h)return;
+  a.set(d.a);age.set(d.age);tmp.set(d.tmp);vel.set(d.vel);trait.set(d.trait);
+  rr.set(d.rr);gg.set(d.gg);bb.set(d.bb);tick=d.tick||1;
+ }catch{}
+};
+const setBrush=n=>{br=Math.max(1,Math.min(16,n));sl.value=br;so.value=br};
+const pickTool=(id,btn)=>{
+ t=id;
+ [...ui.children].forEach(x=>x.classList.toggle('on',btn?x===btn:+x.dataset.t===id));
+};
+const KEYS={Digit1:S,Digit2:W,Digit3:B,Digit4:O,Digit5:F,Digit6:D,Digit7:L,Digit8:P,Digit9:A,KeyJ:J,Backspace:E,Delete:E};
 const experiment=v=>{clear();const cx=w>>1,cy=h>>1;if(v==='hourglass'){
  const top=24,bot=h-10,neck=cy,wide=Math.min(38,(w>>1)-8),th=3,gap=2;
 
@@ -404,11 +450,55 @@ const experiment=v=>{clear();const cx=w>>1,cy=h>>1;if(v==='hourglass'){
  }
  // Alkupalo etenee maanpinnassa eikä muodosta yhtä pystysuoraa tulipylvästä.
  for(let x=7;x<18;x++)if(Math.random()<.65)set(I(x,ground-3-(Math.random()*3|0)),F,35);
+}else if(v==='volcano'){
+ const base=h-8,peak=cy-20,r=Math.min(42,w>>2);
+ rect(4,base+2,w-5,h-2,B);
+ for(let y=peak;y<=base;y++){
+  const p=(y-peak)/Math.max(1,base-peak),half=Math.max(3,Math.round(r*(1-p*p)));
+  for(let x=cx-half;x<=cx+half;x++){
+   const i=I(x,y);if(i<0)continue;
+   if(a[i]===E)set(i,S);
+   if(Math.random()<.08)set(i,B);
+  }
+ }
+ rect(cx-5,base-4,cx+5,base,B);
+ for(let y=base-3;y<=base;y++)for(let x=cx-3;x<=cx+3;x++)set(I(x,y),F,60);
+ for(let n=0;n<80;n++){
+  const ang=Math.random()*Math.PI*2,d=Math.random()*r*.9;
+  set(I(cx+Math.cos(ang)*d|0,peak+Math.abs(Math.sin(ang))*d*.4|0),S);
+ }
 }else if(v==='acid'){rect(8,h-3,w-9,h-1,B);rect(8,h-35,10,h-2,B);rect(w-11,h-35,w-9,h-2,B);rect(11,h-25,w-12,h-4,A);rect(cx-18,h-50,cx+18,h-36,D)}};
-Object.entries(M).filter(([id])=>+id!==K).forEach(([id,v])=>{const b=document.createElement('button');b.dataset.t=id;b.innerHTML=`<i class="dot" style="--c:${v.c[0]}"></i>${v.n}`;b.onclick=()=>{t=+id;[...ui.children].forEach(x=>x.classList.toggle('on',x===b))};if(+id===S)b.className='on';ui.appendChild(b)});const er=document.createElement('button');er.textContent='Pyyhin';er.onclick=()=>{t=E;[...ui.children].forEach(x=>x.classList.toggle('on',x===er))};ui.appendChild(er);
-sl.oninput=()=>{br=+sl.value;so.value=br};document.querySelector('#pause').onclick=e=>{run^=1;e.currentTarget.textContent=run?'⏸ Tauko':'▶ Jatka'};document.querySelector('#step').onclick=()=>{once=1};document.querySelector('#clear').onclick=clear;document.querySelector('#load').onclick=()=>{const v=document.querySelector('#exp').value;if(v)experiment(v)};
-const pos=e=>{const r=c.getBoundingClientRect();mouse.x=e.clientX-r.left;mouse.y=e.clientY-r.top};c.onpointerdown=e=>{mouse.d=1;pos(e);c.setPointerCapture(e.pointerId)};c.onpointermove=pos;c.onpointerup=c.onpointercancel=()=>mouse.d=0;
-const loop=()=>{if(mouse.d)paint();if(run||once){step();once=0}draw();requestAnimationFrame(loop)};addEventListener('resize',R);R();loop();
+Object.entries(M).filter(([id])=>+id!==K).forEach(([id,v])=>{const b=document.createElement('button');b.dataset.t=id;b.title=`${v.n} (${Object.keys(KEYS).find(k=>KEYS[k]===+id)?.replace('Digit','').replace('Key','')||''})`;b.innerHTML=`<i class="dot" style="--c:${v.c[0]}"></i>${v.n}`;b.onclick=()=>pickTool(+id,b);if(+id===S)b.className='on';toolBtns.set(+id,b);ui.appendChild(b)});
+const er=document.createElement('button');er.textContent='Pyyhin';er.title='Pyyhin (Del)';er.onclick=()=>pickTool(E,er);ui.appendChild(er);
+sl.oninput=()=>setBrush(+sl.value);
+spdEl.oninput=()=>{spd=+spdEl.value;spdOut.textContent=spd+'×'};
+wc.oninput=()=>cc.clear();
+pauseBtn.onclick=e=>{run^=1;e.currentTarget.textContent=run?'⏸ Tauko':'▶ Jatka'};
+document.querySelector('#step').onclick=()=>{once=1};
+document.querySelector('#clear').onclick=clear;
+document.querySelector('#load').onclick=()=>{const v=document.querySelector('#exp').value;if(v)experiment(v)};
+addEventListener('keydown',e=>{
+ if(e.target.closest('input,select,textarea'))return;
+ const id=KEYS[e.code];
+ if(id!=null){pickTool(id,toolBtns.get(id));e.preventDefault();return}
+ if(e.code==='Space'){run^=1;pauseBtn.textContent=run?'⏸ Tauko':'▶ Jatka';e.preventDefault()}
+ else if(e.code==='BracketLeft'){setBrush(br-1);e.preventDefault()}
+ else if(e.code==='BracketRight'){setBrush(br+1);e.preventDefault()}
+});
+c.addEventListener('wheel',e=>{e.preventDefault();setBrush(br+(e.deltaY<0?1:-1))},{passive:false});
+const pos=e=>{const r=c.getBoundingClientRect();mouse.x=e.clientX-r.left;mouse.y=e.clientY-r.top};
+c.onpointerdown=e=>{mouse.d=1;mouse.sh=e.shiftKey;pos(e);if(e.shiftKey)shiftFrom={x:mouse.x/Z|0,y:mouse.y/Z|0};else shiftFrom=null;c.setPointerCapture(e.pointerId)};
+c.onpointermove=e=>{mouse.sh=e.shiftKey;pos(e)};
+c.onpointerup=c.onpointercancel=()=>{mouse.d=0;shiftFrom=null};
+const loop=()=>{
+ if(mouse.d)paint();
+ if(run||once){for(let s=0;s<spd;s++)step();once=0}
+ draw();
+ if(tick-saveT>900){snap();saveT=tick}
+ requestAnimationFrame(loop)
+};
+addEventListener('resize',()=>{R();restore()});
+R();restore();loop();
 })();
 </script>
 </body>
