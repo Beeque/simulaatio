@@ -81,6 +81,44 @@ const around=(x,y,v)=>{
  return r
 };
 const one=(x,y,v)=>{const r=around(x,y,v);return r.length?r[Math.random()*r.length|0]:-1};
+const wPass=[E,O,V];
+const wFloor=(x,y)=>{const u=I(x,y+1);return u<0||!wPass.includes(a[u])};
+const wTop=x=>{for(let yy=0;yy<h;yy++)if(a[I(x,yy)]===W)return yy;return h};
+const water=(x,y,i,q)=>{
+ mix(x,y,i);
+ const d=(tick+q)&1?1:-1,dirs=(q&1)?[-1,1]:[1,-1];
+ const b=I(x,y+1);
+ if(b>=0&&wPass.includes(a[b])&&swap(i,b))return;
+ if(mv(x,y,i,[[d,1],[-d,1]],wPass))return;
+ for(const e of dirs){
+  const j=I(x+e,y);
+  if(j>=0&&a[j]===E&&wFloor(x+e,y)&&swap(i,j))return;
+ }
+ let dst=-1,best=99,drop=-1,dropD=99;
+ for(const e of [-1,1])for(let n=1;n<=56;n++){
+  const cx=x+e*n,j=I(cx,y);
+  if(j<0||a[j]!==W&&a[j]!==E)break;
+  if(a[j]===E){
+   if(wFloor(cx,y)&&n<best){best=n;dst=j}
+   else if(!wFloor(cx,y)&&n<dropD){dropD=n;drop=j}
+   break;
+  }
+ }
+ if(dst>=0){swap(i,dst);return}
+ if(drop>=0){swap(i,drop);return}
+ const top=wTop(x);
+ if(y<=top+2){
+  for(const e of dirs){
+   const cx=x+e;if(cx<0||cx>=w)continue;
+   for(let yy=y;yy<h;yy++){
+    if(a[I(cx,yy)]===W)break;
+    const j=I(cx,yy);
+    if(j>=0&&a[j]===E&&wFloor(cx,yy)&&swap(i,j))return;
+   }
+  }
+ }
+ mv(x,y,i,[[1,0],[-1,0],[d,0],[-d,0]],wPass);
+};
 const woodOpen=(x,y)=>around(x,y,E).length+around(x,y,F).length+around(x,y,V).length;
 const heatFuel=(x,y,i,amt)=>{
  if(i<0)return;
@@ -136,26 +174,7 @@ const liquid=(x,y,i,v)=>{
  const d=(tick+q)&1?1:-1;
 
 
- if(v===W){
-  mix(x,y,i);
-  const b=I(x,y+1);
-  if(b>=0&&pass.includes(a[b])&&swap(i,b))return;
-  if(mv(x,y,i,[[d,1],[-d,1]],pass))return;
-  let dst=-1,dist=99,drop=-1,dd=99;
-  for(const e of [d,-d])for(let n=1;n<=20;n++){
-   const j=I(x+e*n,y);if(j<0||a[j]!==W&&a[j]!==E)break;
-   if(a[j]===E){
-    const u=I(x+e*n,y+1),supported=u<0||!pass.includes(a[u]);
-    if(supported&&n<dist){dst=j;dist=n}
-    else if(n<dd){drop=j;dd=n}
-    break
-   }
-  }
-  if(dst<0)dst=drop;
-  if(dst>=0){swap(i,dst);return}
-  if((tick+q)%3===0)mv(x,y,i,[[d,0],[-d,0]],pass);
-  return
- }
+ if(v===W){water(x,y,i,q);return}
  if(v===O){
   // Öljy kelluu vedessä: nousee veden läpi ja leviää pinnalle.
   const u=I(x,y-1);
